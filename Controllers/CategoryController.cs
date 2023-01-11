@@ -19,4 +19,12 @@ public class CategoryController : Controller
 
         return View(categories);
     }
+
+    // GET - Create
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+
 }
