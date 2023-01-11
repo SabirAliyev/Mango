@@ -29,9 +29,14 @@ public class ProductController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult Create(Product prod) 
-    { 
-        _db.Product.Add(prod);
-        _db.SaveChanges();
-        return RedirectToAction("Index");
+    {
+        // Seerver side validation
+        if (ModelState.IsValid) {
+            _db.Product.Add(prod);
+            _db.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
+        return View(prod);
     }
 }

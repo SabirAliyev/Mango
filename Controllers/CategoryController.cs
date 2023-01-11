@@ -30,9 +30,14 @@ public class CategoryController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Create(Category cat)
     {
-        _db.Category.Add(cat);
-        _db.SaveChanges();
-        return RedirectToAction("Index");
+        // Server side validation
+        if (ModelState.IsValid) {
+            _db.Category.Add(cat);
+            _db.SaveChanges();
+            return RedirectToAction("Index");
+        }
+        
+        return View(cat);
     }
 
 
