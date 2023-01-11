@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Mango.Models;
 
@@ -9,5 +10,6 @@ public class Category
 
     public string Name  { get; set; }
 
+    [DisplayName("Display Order")]
     public string DisplayOrder { get; set; }
 }
