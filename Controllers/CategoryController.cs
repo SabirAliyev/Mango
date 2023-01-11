@@ -26,5 +26,15 @@ public class CategoryController : Controller
         return View();
     }
 
+    // POST - Create
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Create(Category cat)
+    {
+        _db.Category.Add(cat);
+        _db.SaveChanges();
+        return RedirectToAction("Index");
+    }
+
 
 }
