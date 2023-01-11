@@ -4,36 +4,34 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Mango.Controllers;
 
-public class CategoryController : Controller
+public class ProductController : Controller
 {
     public readonly ApplicationDbContext _db;
 
-    public CategoryController(ApplicationDbContext db)
+    public ProductController(ApplicationDbContext db)
     {
         _db = db;
     }
 
     public IActionResult Index()
     {
-        IEnumerable<Category> categories = _db.Category;
-        return View(categories);
+        IEnumerable<Product> products = _db.Product;
+        return View(products);
     }
 
     // GET - Create
-    public IActionResult Create()
+    public IActionResult Create() 
     {
         return View();
     }
 
-    // POST - Create
+    //POST - Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(Category cat)
-    {
-        _db.Category.Add(cat);
+    public IActionResult Create(Product prod) 
+    { 
+        _db.Product.Add(prod);
         _db.SaveChanges();
         return RedirectToAction("Index");
     }
-
-
 }
