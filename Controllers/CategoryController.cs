@@ -56,7 +56,7 @@ public class CategoryController : Controller
         return View(obj);
     }
 
-    // POST - Create
+    // POST - Edit
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult Edit(Category obj)
