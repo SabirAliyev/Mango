@@ -61,7 +61,6 @@ public class CategoryController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Edit(Category obj)
     {
-        // Server side validation
         if (ModelState.IsValid) {
             _db.Category.Update(obj);
             _db.SaveChanges();
@@ -69,5 +68,36 @@ public class CategoryController : Controller
         }
 
         return View(obj);
+    }
+
+    // GET - Delete
+    public IActionResult Delete(int? id)
+    {
+        if (id == null || id == 0) {
+            return NotFound();
+        }
+
+        var obj = _db.Category.Find(id);
+        if (obj == null) {
+            return NotFound();
+        }
+
+
+        return View(obj);
+    }
+
+    // POST - Delete
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Remove(int? id)
+    {
+        var obj = _db.Category.Find(id);
+        if (obj == null) {
+            return NotFound();
+        }
+
+        _db.Category.Remove(obj);
+        _db.SaveChanges();
+        return RedirectToAction("Index");
     }
 }
