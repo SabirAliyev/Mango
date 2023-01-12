@@ -35,7 +35,7 @@
                         <label asp-for="Product.Description"></label>
                     </div>
                     <div class="col-8">
-                        <input asp-for="Product.Description" class="form-control" />
+                        <textarea asp-for="Product.Description" class="form-control summernote" ></textarea>
                         <span asp-validation-for="Product.Description" class="text-danger"></span>
                     </div>
 
@@ -108,9 +108,30 @@
 
 </form>
 
-@*Client-side validation*@
+
 @section Scripts{
-    @*Link to validation scripts file*@
+    @*Client-side validation (Link to validation scripts file)*@
     <partial name="_ValidationScriptsPartial" />
+
+    @*script for error message*@
+    <script>
+        $(document).ready(function() {
+            $('.summernote').summernote({
+                height:250
+            });
+        });
+        function validateInput() {
+            if (document.getElementById("uploadBox").value == "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Please upload an image!',
+                    //footer: '<a href="">Why do I have this issue?</a>'
+                })
+                return false;
+            }
+            return true;
+        }
+    </script>
 }
 
