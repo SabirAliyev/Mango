@@ -15,22 +15,37 @@ public class ProductController : Controller
 
     public IActionResult Index()
     {
-        IEnumerable<Product> products = _db.Product;
-        return View(products);
+        IEnumerable<Product> objList = _db.Product;
+
+        foreach (var obj in objList) {
+            obj.Category = _db.Category.FirstOrDefault(u => u.Id == obj.CategoryId);
+        }
+
+        return View(objList);
     }
 
-    // GET - Create
-    public IActionResult Create()
+    // GET - Upsert (universal method for Create and Edit Product)
+    public IActionResult Upsert(int? id)
     {
-        return View();
+        Product product = new Product();
+        if (id == null) {
+            // this is for create
+            return View(product);
+        } else {
+            product = _db.Product.Find(id);
+            if (product == null) {
+                return NotFound();
+            }
+            return View(product);
+        }
     }
 
-    //POST - Create
+    //POST - Upsert
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(Product obj)
+    public IActionResult Upsert(Product obj)
     {
-        // Seerver side validation
+        // Server side validation
         if (ModelState.IsValid) {
             _db.Product.Add(obj);
             _db.SaveChanges();
@@ -40,34 +55,6 @@ public class ProductController : Controller
         return View(obj);
     }
 
-    // GET - Edit
-    public IActionResult Edit(int? id)
-    {
-        if (id == null || id == 0) {
-            return View();
-        }
-
-        var obj = _db.Product.Find(id);
-        if (obj == null) {
-            return View();
-        }
-
-        return View(obj);
-    }
-
-    //POST - Edit
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult Edit(Product obj)
-    {
-        if (ModelState.IsValid) {
-            _db.Product.Update(obj);
-            _db.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
-        return View(obj);
-    }
 
     // GET - Delete
     public IActionResult Delete(int? id)
