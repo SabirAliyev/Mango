@@ -1,5 +1,6 @@
 ﻿using Mango.Data;
 using Mango.Models;
+using Mango.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -28,26 +29,38 @@ public class ProductController : Controller
     // GET - Upsert (universal method for Create and Edit Product)
     public IActionResult Upsert(int? id)
     {
-        // Get Categories list of Product for dropdown list
-        IEnumerable<SelectListItem> CategoryDropDown = _db.Category.Select(i => new SelectListItem
+        //// Get Categories list of Product for dropdown list
+        //IEnumerable<SelectListItem> CategoryDropDown = _db.Category.Select(i => new SelectListItem
+        //{
+        //    Text = i.Name,
+        //    Value = i.Id.ToString()
+        //});
+
+        //// Get the dynamic ViewBag
+        //ViewBag.CategoryDropDown = CategoryDropDown;
+
+        // Product product = new Product();
+
+        ProductVM productVM = new ProductVM()
         {
-            Text = i.Name,
-            Value = i.Id.ToString()
-        });
+            Product = new Product(),
+            CategorySelectList = _db.Category.Select(i => new SelectListItem
+            {
+                Text = i.Name,
+                Value = i.Id.ToString()
+            })
+        };
 
-        // Get the dynamic ViewBag
-        ViewBag.CategoryDropDown = CategoryDropDown;
 
-        Product product = new Product();
         if (id == null) {
             // this is for create
-            return View(product);
+            return View(productVM);
         } else {
-            product = _db.Product.Find(id);
-            if (product == null) {
+            productVM.Product = _db.Product.Find(id);
+            if (productVM.Product == null) {
                 return NotFound();
             }
-            return View(product);
+            return View(productVM);
         }
     }
 
