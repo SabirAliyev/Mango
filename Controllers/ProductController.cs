@@ -3,44 +3,35 @@ using Mango.Models;
 using Mango.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mango.Controllers;
 
 public class ProductController : Controller
 {
-    public readonly ApplicationDbContext _db;
+    private readonly ApplicationDbContext _db;
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
-    public ProductController(ApplicationDbContext db)
+    public ProductController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment)
     {
         _db = db;
+        _webHostEnvironment = webHostEnvironment;
     }
 
     public IActionResult Index()
     {
-        IEnumerable<Product> objList = _db.Product;
+        IEnumerable<Product> objList = _db.Product.Include(u=>u.Category);
 
-        foreach (var obj in objList) {
-            obj.Category = _db.Category.FirstOrDefault(u => u.Id == obj.CategoryId);
-        }
-
+        //foreach (var obj in objList) {
+        //    obj.Category = _db.Category.FirstOrDefault(u => u.Id == obj.CategoryId);
+        //}
+        
         return View(objList);
     }
 
     // GET - Upsert (universal method for Create and Edit Product)
     public IActionResult Upsert(int? id)
     {
-        //// Get Categories list of Product for dropdown list
-        //IEnumerable<SelectListItem> CategoryDropDown = _db.Category.Select(i => new SelectListItem
-        //{
-        //    Text = i.Name,
-        //    Value = i.Id.ToString()
-        //});
-
-        //// Get the dynamic ViewBag
-        //ViewBag.CategoryDropDown = CategoryDropDown;
-
-        // Product product = new Product();
-
         ProductVM productVM = new ProductVM()
         {
             Product = new Product(),
@@ -48,7 +39,7 @@ public class ProductController : Controller
             {
                 Text = i.Name,
                 Value = i.Id.ToString()
-            })
+            }),
         };
 
 
@@ -60,6 +51,7 @@ public class ProductController : Controller
             if (productVM.Product == null) {
                 return NotFound();
             }
+
             return View(productVM);
         }
     }
@@ -67,16 +59,41 @@ public class ProductController : Controller
     //POST - Upsert
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Upsert(Product obj)
+    public IActionResult Upsert(ProductVM productVM)
     {
-        // Server side validation
+        ModelState.Remove("Product.Category");
+        ModelState.Remove("Product.Image");
+        // Temporary ModelState Validation fix - TODO in ViewModel.
+
         if (ModelState.IsValid) {
-            _db.Product.Add(obj);
+            var files = HttpContext.Request.Form.Files;
+            string webRootPath = _webHostEnvironment.WebRootPath;
+
+            if (productVM.Product.Id == 0) {
+                // creating
+                string upload = webRootPath + WebConstants.ImagePath;
+                string fileName = Guid.NewGuid().ToString();
+                string extention = Path.GetExtension(files[0].FileName);
+
+                using (var fileStream = new FileStream(Path.Combine(upload, fileName + extention), FileMode.Create)) {
+                    files[0].CopyTo(fileStream);
+                }
+
+                productVM.Product.Image = fileName + extention;
+
+                _db.Product.Add(productVM.Product);
+
+            }
+            else {
+                // update
+            }
+
             _db.SaveChanges();
+
             return RedirectToAction("Index");
         }
 
-        return View(obj);
+        return View();
     }
 
 

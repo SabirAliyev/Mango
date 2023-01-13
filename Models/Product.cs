@@ -12,10 +12,6 @@ public class Product
     [Required]
     public string Name { get; set; }
 
-    [DisplayName("Category Name")]
-    [Required]
-    public string CategoryName { get; set; }
-
     [MaxLength(100)]
     public string Description { get; set; }
 
@@ -28,6 +24,7 @@ public class Product
     [Range(0, 5, ErrorMessage = "Status must be in range of 0 - 5")]
     public int Status { get; set; }
 
+    [DisplayName("Category Type")]
     public int CategoryId { get; set; }
 
     [ForeignKey("CategoryId")]
