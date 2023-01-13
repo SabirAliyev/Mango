@@ -21,10 +21,6 @@ public class ProductController : Controller
     public IActionResult Index()
     {
         IEnumerable<Product> objList = _db.Product.Include(u=>u.Category);
-
-        //foreach (var obj in objList) {
-        //    obj.Category = _db.Category.FirstOrDefault(u => u.Id == obj.CategoryId);
-        //}
         
         return View(objList);
     }
@@ -66,7 +62,7 @@ public class ProductController : Controller
         // Temporary ModelState Validation fix - TODO in Product ViewModel.
 
         if (ModelState.IsValid) {
-            var files = HttpContext.Request.Form.Files;
+            IFormFileCollection files = HttpContext.Request.Form.Files;
             string webRootPath = _webHostEnvironment.WebRootPath;
 
             if (productVM.Product.Id == 0) {
@@ -86,6 +82,33 @@ public class ProductController : Controller
             }
             else {
                 // update
+                Product? objFromDB = _db.Product.AsNoTracking().FirstOrDefault(u => u.Id == productVM.Product.Id);
+                //( IMPORTANT! ) - AsNoTracking() method used to prevent EF of confusing witch object to be updated.
+
+                if (objFromDB != null) {
+                    if (files.Count > 0) {
+                        string upload = webRootPath + WebConstants.ImagePath;
+                        string fileName = Guid.NewGuid().ToString();
+                        string extention = Path.GetExtension(files[0].FileName);
+
+                        string oldFile = Path.Combine(upload, objFromDB.Image);
+
+                        if (System.IO.File.Exists(oldFile)) {
+                            System.IO.File.Delete(oldFile);
+                        }
+
+                        using (var fileStream = new FileStream(Path.Combine(upload, fileName + extention), FileMode.Create)) {
+                            files[0].CopyTo(fileStream);
+                        }
+
+                        productVM.Product.Image = fileName + extention;
+                    }
+                    else {
+                        productVM.Product.Image = objFromDB.Image;
+                    }
+
+                    _db.Product.Update(productVM.Product);
+                }
             }
 
             _db.SaveChanges();
@@ -93,7 +116,13 @@ public class ProductController : Controller
             return RedirectToAction("Index");
         }
 
-        return View();
+        productVM.CategorySelectList = _db.Category.Select(i => new SelectListItem
+        {
+            Text = i.Name,
+            Value = i.Id.ToString()
+        });
+
+        return View(productVM);
     }
 
 
@@ -104,12 +133,14 @@ public class ProductController : Controller
             return View();
         }
 
-        var obj = _db.Product.Find(id);
-        if (obj == null) {
+        // using "eager loading" with JOIN specific Category
+        Product? product = _db.Product.Include(u=>u.Category).FirstOrDefault(u=>u.Id==id);        
+
+        if (product == null) {
             return View();
         }
 
-        return View(obj);
+        return View(product);
     }
 
     //POST - Delete
@@ -117,13 +148,24 @@ public class ProductController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Remove(int? id)
     {
-        var obj = _db.Product.Find(id);
-        if (obj == null) {
+        var objFromDB = _db.Product.Find(id);
+        if (objFromDB == null) {
             return NotFound();
         }
 
-        _db.Product.Remove(obj);
+        if (objFromDB.Image != null) {
+            string imageRepo = _webHostEnvironment.WebRootPath + WebConstants.ImagePath;
+
+            string oldFile = Path.Combine(imageRepo, objFromDB.Image);
+
+            if (System.IO.File.Exists(oldFile)) {
+                System.IO.File.Delete(oldFile);
+            }
+        }
+
+        _db.Product.Remove(objFromDB);
         _db.SaveChanges();
+
         return RedirectToAction("Index");
     }
 
