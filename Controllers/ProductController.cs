@@ -63,7 +63,7 @@ public class ProductController : Controller
     {
         ModelState.Remove("Product.Category");
         ModelState.Remove("Product.Image");
-        // Temporary ModelState Validation fix - TODO in ViewModel.
+        // Temporary ModelState Validation fix - TODO in Product ViewModel.
 
         if (ModelState.IsValid) {
             var files = HttpContext.Request.Form.Files;
