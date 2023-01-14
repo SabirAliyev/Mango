@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+@using Mango.Utility
+@inject IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -21,7 +25,7 @@
                 </button>
 
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1" style="background-color: #e3f2fd;">
+                    <ul class="navbar-nav flex-grow-1" style="background-color: bisque;">
                         <li class="nav-item">
                              <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
@@ -39,6 +43,20 @@
                                     </li>
                                 <li><hr class="dropdown-divider"></li>
                               </ul>
+                        </li>
+                        <li>
+                            @if (HttpContextAccessor.HttpContext?.Session.Get<List<ShoppingCart>>(WebConstants.SessionCart) != null) {
+                                <a asp-action="Index" asp-asp-controller="Cart" class="nav-link">
+                                    @{
+                                        var count = HttpContextAccessor.HttpContext.Session.Get<List<ShoppingCart>>(WebConstants.SessionCart);
+                                    }
+                                    <i class="fas fa-shopping-cart"></i> &nbsp; (@count)
+                                </a>
+                            } else {
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-shopping-cart"></i> &nbsp; (0)
+                                </a>
+                            }
                         </li>
                     </ul>
                 </div>
