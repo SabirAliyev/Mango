@@ -82,7 +82,7 @@ public class ProductController : Controller
             }
             else {
                 // update
-                Product? objFromDB = _db.Product.AsNoTracking().FirstOrDefault(u => u.Id == productVM.Product.Id);
+                Product objFromDB = _db.Product.AsNoTracking().FirstOrDefault(u => u.Id == productVM.Product.Id);
                 //( IMPORTANT! ) - AsNoTracking() method used to prevent EF of confusing witch object to be updated.
 
                 if (objFromDB != null) {
@@ -134,7 +134,7 @@ public class ProductController : Controller
         }
 
         // using "eager loading" with JOIN specific Category
-        Product? product = _db.Product.Include(u=>u.Category).FirstOrDefault(u=>u.Id==id);        
+        Product product = _db.Product.Include(u=>u.Category).FirstOrDefault(u=>u.Id==id);        
 
         if (product == null) {
             return View();

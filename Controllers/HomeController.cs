@@ -44,7 +44,7 @@ namespace Mango.Controllers
 
         public IActionResult Details(int id)
         {
-            List<ShoppingCart>? shoppingCartList = GetShoppingCartList();
+            List<ShoppingCart> shoppingCartList = GetShoppingCartList();
 
             DetailsVM detailsVM = new DetailsVM();
             detailsVM.Product = _db.Product.Include(u => u.Category).Where(u => u.Id == id).FirstOrDefault();
@@ -64,7 +64,7 @@ namespace Mango.Controllers
         [HttpPost, ActionName("Details")]
         public IActionResult DetailsPost(int id)
         {
-            List<ShoppingCart>? shoppingCartList = GetShoppingCartList();
+            List<ShoppingCart> shoppingCartList = GetShoppingCartList();
                 
             shoppingCartList?.Add(new ShoppingCart { ProductId = id });
             HttpContext.Session.Set(WebConstants.SessionCart, shoppingCartList);
@@ -74,7 +74,7 @@ namespace Mango.Controllers
         
         public IActionResult RemoveFromCart(int id)
         {
-            List<ShoppingCart>? shoppingCartList = GetShoppingCartList();
+            List<ShoppingCart> shoppingCartList = GetShoppingCartList();
 
             var removalItem = shoppingCartList?.SingleOrDefault(r => r.ProductId == id);
             if (removalItem != null) {

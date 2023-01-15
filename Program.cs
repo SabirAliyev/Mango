@@ -1,4 +1,5 @@
 using Mango.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,11 +11,13 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddDefaultIdentity<IdentityUser>()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+
 builder.Services.AddSession(Options => {
     Options.IdleTimeout = TimeSpan.FromMinutes(10);
     Options.Cookie.HttpOnly = true;
     Options.Cookie.IsEssential = true;
-
 });
 
 
@@ -31,7 +34,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
 app.MapControllerRoute(
