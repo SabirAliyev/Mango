@@ -32,11 +32,25 @@ namespace Mango.Controllers
 
         public IActionResult Details(int id)
         {
-            DetailsVM detailsVM = new DetailsVM()
-            {
-                Product = _db.Product.Include(u => u.Category).Where(u => u.Id == id).FirstOrDefault(),
-                ExistInCard = false
-            };
+            List<ShoppingCart>? shoppingCartList = new List<ShoppingCart>();
+            var existingShoppingCartList = HttpContext.Session.Get<List<ShoppingCart>>(WebConstants.SessionCart);
+
+            if (existingShoppingCartList != null && existingShoppingCartList.Count() > 0) {
+                shoppingCartList = HttpContext.Session.Get<List<ShoppingCart>>(WebConstants.SessionCart);
+            }
+
+            DetailsVM detailsVM = new DetailsVM();
+
+            detailsVM.Product = _db.Product.Include(u => u.Category).Where(u => u.Id == id).FirstOrDefault();
+
+            // Checking wether Shopping Contains this Product
+            if (shoppingCartList != null) {
+                foreach (var item in shoppingCartList) {
+                    if (item.ProductId == id) {
+                        detailsVM.ExistInCard = true;
+                    }
+                }
+            }
 
             return View(detailsVM);
         }
