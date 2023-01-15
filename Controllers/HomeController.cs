@@ -30,17 +30,23 @@ namespace Mango.Controllers
             return View(homeVM);
         }
 
-        public IActionResult Details(int id)
+        private List<ShoppingCart> GetShoppingCartList()
         {
-            List<ShoppingCart>? shoppingCartList = new List<ShoppingCart>();
-            var existingShoppingCartList = HttpContext.Session.Get<List<ShoppingCart>>(WebConstants.SessionCart);
+            var shoppingCartList = HttpContext.Session.Get<List<ShoppingCart>>(WebConstants.SessionCart);
 
-            if (existingShoppingCartList != null && existingShoppingCartList.Count() > 0) {
+            if (shoppingCartList != null && shoppingCartList.Count() > 0) {
                 shoppingCartList = HttpContext.Session.Get<List<ShoppingCart>>(WebConstants.SessionCart);
             }
 
-            DetailsVM detailsVM = new DetailsVM();
+            shoppingCartList ??= new List<ShoppingCart>(); // (if shoppingCartList == null)
+            return shoppingCartList;
+        }
 
+        public IActionResult Details(int id)
+        {
+            List<ShoppingCart>? shoppingCartList = GetShoppingCartList();
+
+            DetailsVM detailsVM = new DetailsVM();
             detailsVM.Product = _db.Product.Include(u => u.Category).Where(u => u.Id == id).FirstOrDefault();
 
             // Checking wether Shopping Contains this Product
@@ -58,14 +64,23 @@ namespace Mango.Controllers
         [HttpPost, ActionName("Details")]
         public IActionResult DetailsPost(int id)
         {
-            List<ShoppingCart>? shoppingCartList = new List<ShoppingCart>();
-            var existingShoppingCartList = HttpContext.Session.Get<List<ShoppingCart>>(WebConstants.SessionCart);
-
-            if (existingShoppingCartList != null && existingShoppingCartList.Count() > 0) {
-                shoppingCartList = HttpContext.Session.Get<List<ShoppingCart>>(WebConstants.SessionCart);
-            }
+            List<ShoppingCart>? shoppingCartList = GetShoppingCartList();
                 
             shoppingCartList?.Add(new ShoppingCart { ProductId = id });
+            HttpContext.Session.Set(WebConstants.SessionCart, shoppingCartList);
+
+            return RedirectToAction(nameof(Index));
+        }
+        
+        public IActionResult RemoveFromCart(int id)
+        {
+            List<ShoppingCart>? shoppingCartList = GetShoppingCartList();
+
+            var removalItem = shoppingCartList?.SingleOrDefault(r => r.ProductId == id);
+            if (removalItem != null) {
+                shoppingCartList?.Remove(removalItem);
+            }
+
             HttpContext.Session.Set(WebConstants.SessionCart, shoppingCartList);
 
             return RedirectToAction(nameof(Index));
@@ -81,5 +96,6 @@ namespace Mango.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
     }
 }
