@@ -11,8 +11,16 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddDefaultIdentity<IdentityUser>()
+//builder.Services.AddDefaultIdentity<IdentityUser>()
+//    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+/// Adding new IdentityUser with IdentityRole to make Microsoft.AspNetCore.Identity.RoleManager 
+/// implementation available in the Mango.Areas.Identity.Pages.Account.RegisterModel
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddDefaultTokenProviders().AddDefaultUI()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+
 
 builder.Services.AddSession(Options => {
     Options.IdleTimeout = TimeSpan.FromMinutes(10);

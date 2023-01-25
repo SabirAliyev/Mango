@@ -25,24 +25,27 @@ namespace Mango.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IUserStore<IdentityUser> _userStore;
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
         public RegisterModel(
-            UserManager<IdentityUser> userManager,
-            IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
+            UserManager<IdentityUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IUserStore<IdentityUser> userStore,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
-            _userManager = userManager;
-            _userStore = userStore;
-            _emailStore = GetEmailStore();
             _signInManager = signInManager;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _userStore = userStore;
             _logger = logger;
             _emailSender = emailSender;
+            _emailStore = GetEmailStore();
         }
 
         /// <summary>
@@ -102,6 +105,12 @@ namespace Mango.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
+            // Create first user as Admin if it is the first user in the system
+            if (!await _roleManager.RoleExistsAsync(WebConstants.AdminRole)) {
+                await _roleManager.CreateAsync(new IdentityRole(WebConstants.AdminRole));
+                await _roleManager.CreateAsync(new IdentityRole(WebConstants.CustomerRole));
+            }
+
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
@@ -120,6 +129,15 @@ namespace Mango.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
+                    if (User.IsInRole(WebConstants.AdminRole)) {
+
+                        // add new user with AdminRole
+                        await _userManager.AddToRoleAsync(user, WebConstants.AdminRole);
+                    }
+                    else {
+                        await _userManager.AddToRoleAsync(user, WebConstants.CustomerRole);
+                    }
+
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
