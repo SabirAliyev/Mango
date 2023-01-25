@@ -53,8 +53,8 @@
                               </ul>
                         </li>
                         <li>
-                            @if (HttpContextAccessor.HttpContext?.Session.Get<List<ShoppingCart>>(WebConstants.SessionCart) != null) {
-                                <a asp-action="Index" asp-asp-controller="Cart" class="nav-link">
+                            @if (HttpContextAccessor.HttpContext.Session.Get<List<ShoppingCart>>(WebConstants.SessionCart) != null) {
+                                <a asp-action="Index" asp-controller="Cart" class="nav-link">
                                     @{
                                         var count = HttpContextAccessor.HttpContext.Session.Get<List<ShoppingCart>>(WebConstants.SessionCart).Count;
                                     }
