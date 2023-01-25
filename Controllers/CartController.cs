@@ -31,4 +31,23 @@ public class CartController : Controller
 
         return View(productList);
     }
+
+    public IActionResult Remove(int id)
+    {
+        List<ShoppingCart> shoppingCarttList = new List<ShoppingCart>();
+        if (HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WebConstants.SessionCart) != null
+            && HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WebConstants.SessionCart).Count() > 0) {
+            shoppingCarttList = HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WebConstants.SessionCart).ToList();
+        }
+
+        // remove approptiate product from cart list
+        shoppingCarttList.Remove(shoppingCarttList.FirstOrDefault(u => u.ProductId == id));
+
+        // update shopping cart list
+        HttpContext.Session.Set(WebConstants.SessionCart, shoppingCarttList);
+
+        // redirect to Action Index
+        return RedirectToAction(nameof(Index));
+    }
+
 }
