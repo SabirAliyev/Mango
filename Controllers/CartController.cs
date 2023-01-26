@@ -2,11 +2,14 @@
 using Mango.Models;
 using Mango.Models.ViewModels;
 using Mango.Utility; // using our own implementation
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using System.Security.Claims;
 
 namespace Mango.Controllers;
 
+[Authorize]
 public class CartController : Controller
 {
     public readonly ApplicationDbContext _db;
@@ -66,7 +69,7 @@ public class CartController : Controller
         return RedirectToAction(nameof(Summary));
     }
 
-    private object Summary()
+    public IActionResult Summary()
     {
         ClaimsIdentity claimIdentity = (ClaimsIdentity)User.Identity;
 
@@ -85,12 +88,17 @@ public class CartController : Controller
         List<int> prodsInCart = shoppingCarttList.Select(i => i.ProductId).ToList();
         IEnumerable<Product> productList = _db.Product.Where(u => prodsInCart.Contains(u.Id));
 
+        // query debug
+        //var query = _db.ApplicationUser
+        //    .Where(r => r.Id == claim.Value)
+        //    .Select(r => r);
+
         // using claim object value we get identity information of logged user and put it into ProductUser View Model
         ProductUserVM = new ProductUserVM()
         {
-            ApplicationUser = _db.ApplicationUser.FirstOrDefault(u => u.Id == claim.Value)
+            ApplicationUser = _db.ApplicationUser.FirstOrDefault(u => u.Id == claim.Value),
+            ProductList = productList
         };
-
 
         return View(ProductUserVM);
     }

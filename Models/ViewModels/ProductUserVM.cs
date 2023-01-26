@@ -1,8 +1,10 @@
-﻿namespace Mango.Models.ViewModels;
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace Mango.Models.ViewModels;
 
 public class ProductUserVM
 {
-    public ApplicationUser ApplicationUser { get; set; }
+    public IdentityUser ApplicationUser { get; set; }
     public IEnumerable<Product> ProductList { get; set; }
 
     public ProductUserVM()

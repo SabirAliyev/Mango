@@ -1,4 +1,5 @@
 ﻿using Mango.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,5 +14,5 @@ public class ApplicationDbContext : IdentityDbContext
 
 	public DbSet<Category> Category { get; set; }
 	public DbSet<Product> Product { get; set; }
-	public DbSet<ApplicationUser> ApplicationUser { get; set; }
+	public DbSet<IdentityUser> ApplicationUser { get; set; }
 }
