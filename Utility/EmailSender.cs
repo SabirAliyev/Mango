@@ -7,6 +7,15 @@ namespace Mango.Utility;
 
 public class EmailSender : IEmailSender
 {
+    public readonly IConfiguration _configuration;
+    public MailJetSettings _mailJetSettings { get; set; }
+
+    public EmailSender(IConfiguration configuration, MailJetSettings mailJetSettings)
+    {
+        _configuration = configuration;
+        _mailJetSettings = mailJetSettings;
+    }
+
     public Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
         return Execute(email, subject, htmlMessage);
@@ -14,7 +23,10 @@ public class EmailSender : IEmailSender
 
     public async Task Execute(string email, string subject, string body)
     {
-        MailjetClient client = new MailjetClient("e1466251588c9bd9c777b32094b9af6c", "5eaf4715e2a77d7e923364dbfe490751")
+        // Get mail seettings from json file
+        _mailJetSettings = _configuration.GetSection("MailJet").Get<MailJetSettings>();
+
+        MailjetClient client = new MailjetClient(_mailJetSettings.ApiKey, _mailJetSettings.SecretKey);
         {
             // Version = ApiVersion.V3_1,
         };
