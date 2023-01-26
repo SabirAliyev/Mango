@@ -27,7 +27,7 @@ public class EmailSender : IEmailSender
           {
            "From",
            new JObject {
-            {"Email", "sabir.aliyev.itdep@gmail.com"},
+            {"Email", "mangowallpapers@proton.me"},
             {"Name", "Sabir"}
            }
           }, {

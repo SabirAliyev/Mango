@@ -1,5 +1,7 @@
 using Mango.Data;
+using Mango.Utility;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +23,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddSession(Options => {
     Options.IdleTimeout = TimeSpan.FromMinutes(10);
