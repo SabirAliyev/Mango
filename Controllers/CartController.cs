@@ -97,8 +97,24 @@ public class CartController : Controller
         ProductUserVM = new ProductUserVM()
         {
             ApplicationUser = _db.ApplicationUser.FirstOrDefault(u => u.Id == claim.Value),
-            ProductList = productList
+            ProductList = productList.ToList()
         };
+
+        return View(ProductUserVM);
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [ActionName(nameof(Summary))]
+    public IActionResult SummaryPost(ProductUserVM ProductUserVM)
+    {
+        return RedirectToAction(nameof(InquiryConfirmation));
+    }
+
+    public IActionResult InquiryConfirmation()
+    {
+        HttpContext.Session.Clear();
 
         return View(ProductUserVM);
     }
