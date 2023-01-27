@@ -6,13 +6,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using System.Security.Claims;
+using System.Text;
 
 namespace Mango.Controllers;
 
 [Authorize]
 public class CartController : Controller
 {
-    public readonly ApplicationDbContext _db;
+    private readonly ApplicationDbContext _db;
+
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
     /// <summary>
     /// BindProperty allows us not to psecify this field in action methods as a parameter
@@ -20,9 +23,10 @@ public class CartController : Controller
     [BindProperty]
     public ProductUserVM ProductUserVM { get; set; }
 
-    public CartController(ApplicationDbContext db)
+    public CartController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment)
     {
         _db= db;
+        _webHostEnvironment= webHostEnvironment;
     }
 
 
@@ -109,6 +113,33 @@ public class CartController : Controller
     [ActionName(nameof(Summary))]
     public IActionResult SummaryPost(ProductUserVM ProductUserVM)
     {
+        string pathToTemplate = _webHostEnvironment.WebRootPath + Path.DirectorySeparatorChar.ToString()
+            + "templates" + Path.DirectorySeparatorChar.ToString() +
+            "Inquiry.html";
+
+        string subject = "New Inquiry";
+        string htmlBody = "";
+        using (StreamReader sr = System.IO.File.OpenText(pathToTemplate)) {
+            htmlBody = sr.ReadToEnd();
+        }
+
+        //Name: { 0}
+        //Email: { 1}
+        //Phone: { 2}
+        //Products: { 3}
+
+        // filling Enquiry html templpate by user data
+        StringBuilder productListSB = new StringBuilder();
+        foreach (var prod in ProductUserVM.ProductList) {
+            productListSB.Append($" - Name: {prod.Name} <span style='font-size:14px;'> (ID: {prod.Id})</span><br />");
+        }
+        string messageBody = string.Format(
+            ProductUserVM.ApplicationUser.UserName,
+            ProductUserVM.ApplicationUser.Email,
+            ProductUserVM.ApplicationUser.PhoneNumber,
+            productListSB.ToString());
+
+
         return RedirectToAction(nameof(InquiryConfirmation));
     }
 
