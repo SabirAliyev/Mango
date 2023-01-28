@@ -10,4 +10,6 @@ public static class WebConstants
 
     public static string AdminRole = "Admin";
     public static string CustomerRole = "Customer";
+
+    public static string EmailAdmin = "sabir.aliyev.itdep@gmail.com";
 }

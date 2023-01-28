@@ -3,6 +3,7 @@ using Mango.Models;
 using Mango.Models.ViewModels;
 using Mango.Utility; // using our own implementation
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using System.Security.Claims;
@@ -17,16 +18,19 @@ public class CartController : Controller
 
     private readonly IWebHostEnvironment _webHostEnvironment;
 
+    private readonly IEmailSender _emailSender;
+
     /// <summary>
     /// BindProperty allows us not to psecify this field in action methods as a parameter
     /// </summary>
     [BindProperty]
     public ProductUserVM ProductUserVM { get; set; }
 
-    public CartController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment)
+    public CartController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment, IEmailSender emailSender)
     {
         _db= db;
         _webHostEnvironment= webHostEnvironment;
+        _emailSender= emailSender;
     }
 
 
@@ -111,7 +115,7 @@ public class CartController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [ActionName(nameof(Summary))]
-    public IActionResult SummaryPost(ProductUserVM ProductUserVM)
+    public async Task<IActionResult> SummaryPost(ProductUserVM ProductUserVM)
     {
         string pathToTemplate = _webHostEnvironment.WebRootPath + Path.DirectorySeparatorChar.ToString()
             + "templates" + Path.DirectorySeparatorChar.ToString() +
@@ -139,6 +143,7 @@ public class CartController : Controller
             ProductUserVM.ApplicationUser.PhoneNumber,
             productListSB.ToString());
 
+        await _emailSender.SendEmailAsync(WebConstants.EmailAdmin, subject, messageBody);
 
         return RedirectToAction(nameof(InquiryConfirmation));
     }
