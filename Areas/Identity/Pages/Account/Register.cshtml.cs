@@ -105,8 +105,9 @@ namespace Mango.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
-            // Create first user as Admin if it is the first user in the system
-            if (!await _roleManager.RoleExistsAsync(WebConstants.AdminRole)) {
+            bool adminExist = await _roleManager.RoleExistsAsync(WebConstants.AdminRole);
+
+            if (!adminExist) {
                 await _roleManager.CreateAsync(new IdentityRole(WebConstants.AdminRole));
                 await _roleManager.CreateAsync(new IdentityRole(WebConstants.CustomerRole));
             }
@@ -127,11 +128,13 @@ namespace Mango.Areas.Identity.Pages.Account
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
+                IList<IdentityUser> adminRoleList = await _userManager.GetUsersInRoleAsync(WebConstants.AdminRole);
+                bool userIsAdmin = User.IsInRole(WebConstants.AdminRole);
+
                 if (result.Succeeded)
                 {
-                    if (User.IsInRole(WebConstants.AdminRole)) {
-
-                        // add new user with AdminRole
+                    if (userIsAdmin || adminRoleList.Count == 0) {
+                        // Create first user as Admin if it is the first user in the system
                         await _userManager.AddToRoleAsync(user, WebConstants.AdminRole);
                     }
                     else {

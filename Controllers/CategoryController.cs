@@ -1,9 +1,11 @@
 ﻿using Mango.Data;
 using Mango.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Mango.Controllers;
 
+[Authorize(Roles = WebConstants.AdminRole)]
 public class CategoryController : Controller
 {
     public readonly ApplicationDbContext _db;

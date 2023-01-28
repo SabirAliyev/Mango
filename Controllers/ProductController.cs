@@ -1,12 +1,14 @@
 ﻿using Mango.Data;
 using Mango.Models;
 using Mango.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Mango.Controllers;
 
+[Authorize(Roles = WebConstants.AdminRole)]
 public class ProductController : Controller
 {
     private readonly ApplicationDbContext _db;
